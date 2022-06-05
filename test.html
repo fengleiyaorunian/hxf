@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>GIS3_ew</title>
+	
+	<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+		<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- 引入刚刚下载的 ECharts 文件 -->
+	
+	<style>
+	  html,
+	  body,
+	  #viewDiv {
+	    padding: 0;
+	    margin: 0;
+	    height: 100%;
+	    width: 100%;
+	  }
+	  #table {
+	    padding: 0;
+	    margin: 0;
+	    height: 30%;
+	    width: 35%;
+/* 		background-color:#d0e4fe;
+ */		
+		float: bottom;
+/* 		resize: both;
+		overflow: auto;
+ */			position:absolute;
+						left: 0;
+						top:50%	
+	  }
+	  
+	  #p1{
+		  height: 100%;
+		  width: 70%;
+		  background-color:#ffaa00;
+		  font-family:"Times New Roman", Times, serif;
+		  	font-size:14px;
+			position:absolute;
+				left: 0;
+				top:10%	
+	  }
+	  
+	  #p2{
+	  		  height: 100%;
+	  		  width: 30%;
+ 	  		  background-color:#00aa7f;
+	   		  font-family:"Times New Roman", Times, serif;
+	  		  	font-size:14px;
+	  			position:absolute;
+	  				left: 70%;
+	  				top:10%	
+	  	  }
+	  
+	  
+	  #table2 {
+	    padding: 0;
+	    margin: 0;
+	    height: 60%;
+	    width: 50%;
+		background-color:#d0e4fe;
+	  		float: bottom;
+/* 	  		resize: both;
+	  		overflow: auto;
+ */ 	  			position:absolute;
+	  						left: 40%;
+	  						top:30%	
+	  }
+	  
+			  
+	</style>
+	
+	
+    <script src="echarts.min.js"></script>
+	<link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/light/main.css">
+	    <script src="https://js.arcgis.com/4.23/"></script>
+	
+  </head>
+  <body>
+<nav class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
+	 <div class="container-fluid">
+	 <div class="navbar-header">
+	         <a class="navbar-brand" href="#">俄乌冲突</a>
+	     </div>
+	 <button type="button" class="btn btn-info" id="btn2" onclick="addDiv_civilian()">平民伤亡</button>
+	 <button type="button" class="btn btn-success" id="btn3" onclick="addDiv_demage()">俄乌战绩</button>
+	 <button type="button" class="btn btn-success" id="btn3" onclick="addDiv_Point(7)">顿涅茨克局势</button>
+	 <button type="button" class="btn btn-danger" id="btn" onclick="addDiv_Point(6)">伊久姆局势</button>
+	 <button type="button" class="btn btn-warning" id="btn" onclick="addDiv_Point(6)">伊久姆局势</button>
+	 <button type="button" class="btn btn-info" id="btn" onclick="addDiv_Point(4)">红场阅兵</button>
+	 
+	 </nav>
+ 
+ 
+ <div id="viewDiv"></div>
+<!-- 	  <div id="table">		  
+	  </div>
+ -->	  
+	  
+<!-- 	  <div id="table2">
+		<p id="p1"></p>
+		<p id="p2"></p>
+   
+	  </div>
+ -->	  
+    <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+    <div id="main" style="width: 600px;height:400px;"></div>
+	
+	<script>
+	
+	var cnm11 = "马里乌波尔（乌克兰语：Маріуполь，英文：Mariupol）位于乌克兰东南部的城市，面积244平方公里，人口约46万，是乌克兰东部顿涅茨克州的城市，为顿涅茨克州第二大城、乌克兰人口最多的十个城市之一。自从俄乌开战以来，马里乌波尔就是俄军在乌东地区进攻的主要目标，也是俄乌冲突中战斗最激烈的地方。从猛烈的炮火打击到残酷的城市巷战，俄乌双方在这里进行了60多天的拉锯战。俄方表示，俄军已经打掉了乌武装人员在马里乌波尔市郊区设置的所有火力点，而且附近的乌武装部队主力也被一并消灭。亚速钢铁厂是乌军在马里乌波尔的重要据点，这里储备的生活和战斗物资，弹药以及食品方面的存量足够乌克兰武装人员在这里坚守一年以上。俄军对于防守亚速钢铁厂的乌军采取的战略是围而不攻，";
+	var cnm12="俄罗斯总统普京4月21日表示，“取消对亚速钢铁厂的进攻，取消进攻计划是为了保护俄军人员的生命。但是要继续封锁亚速钢铁厂，不要让一只苍蝇跑出去。4月22日凌晨，俄罗斯终于宣布“解放”马里乌波尔。”虽然马里乌波尔之战，俄乌的伤亡和消耗仍没有权威公布可查，但双方的损伤无疑是巨大的。"
+	var cnm21="在黑海附近，有这样一个小岛属于乌克兰，不过，与其说它是一个小岛，倒不如说是海面上的一块“大礁石”来的更贴切。因为这座岛屿的实际面积只有0.17平方公里，岛上居住着100多个居民，它位于黑海西北部，多瑙河河口以东，距离乌克兰只有35公里，距离俄罗斯本土大约有500公里。冲突爆发后，俄乌双方围绕蛇岛地区大打出手，激烈程度之高，尚属俄乌开战以来首次。紧接着，俄国防部又公布战报称，乌克兰海空军损失惨重，多架战机及突击登陆艇毁于战火之中。与此同时，乌国防部又在社交媒体上又发布作战视频称，蛇岛地区俄军基础设施遭受空袭，多艘高速登陆艇被击沉击伤。总之，蛇岛之战，俄乌都认定对方损失惨重，己方则大获全胜！"
+	var cnm22="据塔斯社5月9日报道，俄国防部发言人伊戈尔·科纳申科夫少将表示，5月7日起，乌克兰总参谋部连同美英顾问策划了一场夺取黑海中蛇岛的行动，其已被俄罗斯武装力量挫败。“由于驻扎在该岛的俄罗斯武装部队的得力应对，乌克兰的挑衅被挫败了。敌人遭受严重损失。”他称，仅在登陆和试图固守该岛的过程中，就有50多名乌克兰武装人员在海上和海岸被杀。24具乌克兰军人的尸体滞留在蛇岛岸边。"
+	var cnm31="赫尔松（乌克兰语：Херсон）是位于乌克兰南方黑海与第聂伯河沿岸的重要港口城市，也是赫尔松州的首府，人口303,900（2004年）。3月3日，俄罗斯对乌克兰的军事行动进入第八天，赫尔松成为俄军首个攻陷的乌克兰大城市。赫尔松市市长伊戈尔·科利哈耶夫表示：俄罗斯军队强行进入市议会大楼，并对居民实施宵禁。宵禁时间在晚上10点至早晨6点，最多只能2人一组外出，只允许携带食物、药品和其他的物资的汽车进入城市，并以最低速度行驶。夺取赫尔松对于俄军而言意义重大，这能让俄军在当地建立军事基地，并进一步向内陆推进。虽然赫尔松市区被攻陷，但是乌克兰军队依然在这一地区抵抗俄军的进攻，"
+	var cnm32="乌克兰总统泽连斯基5月31日表示，乌克兰武装部队在乌南部城市赫尔松地区附近作战取得了一些进展，目前在哈尔科夫地区，乌方部队仍在持续推进。在扎波罗热地区，乌方部队正在与俄军展开相持。五月底，俄军开始将主攻方向转向卢甘斯克地区和顿涅茨克地区。右图为2022年2月24日－2022年3月2日（开战6天）俄乌冲突形势图。"
+	var cnm41="哈尔科夫是乌克兰第二大城市，是乌克兰东部的教育与重工业中心城市。其城市人口在乌克兰位居第二位。第二阶段战争开始以来，俄罗斯军队一直在三条线上作战，他们的进攻重点在顿巴斯地区，也就是他们发起的顿巴斯战役。除了顿巴斯战场以外，在南部赫尔松州和北部的哈尔科夫，俄军同样在和乌军作战。在哈尔科夫一线，乌克兰军队在向东部伊久姆方向推进，并用火力覆盖切断了伊久姆的主要后勤补给线。这样除了会影响俄罗斯军队在顿巴斯地区的作战外，也使乌军将位于哈尔科夫东部和北部的俄罗斯军队实现分割成为可能。在这种战略态势下，位于哈尔科夫北部的俄罗斯军队为了避免被分割包围的风险，只好匆忙后撤，退回俄罗斯。"
+	var cnm42="这种情形象极了当时包围基辅的俄军的大撤退，预示着自开战以来被围攻了将近两个半月的哈尔科夫终于打退了敌人的进攻。俄军从马里乌波尔撤退之际历经数周绝望抵抗，超过260名乌克兰士兵在亚速钢铁厂投降。这里是马里乌波尔乌克兰守军的最后据点，乌军的撤出，标志着俄军完全控制马里乌波尔，也被视为俄军自2月24日以来的最重大胜利,此时已经开战82天，当地时间5月17日。开战至今，哈尔科夫有大量的历史古建筑受到破坏，根据乌克兰文化部的数据统计，哈尔科夫大约有100座建筑受到影响。自战争开始以来，乌克兰已有350多座历史建筑遭到破坏或被摧毁。如右图：废墟中的教堂。"
+	var cnm51="冲突爆发的第七十五天，5月9日，是俄罗斯卫国战争胜利77周年纪念日，当天在俄罗斯莫斯科红场77周年阅兵式。俄罗斯总统普京出席阅兵式并致辞，但是他在演讲中并未发表重大声明。普京表示，俄军正在为“我们在顿巴斯的人民以及我们祖国的安全而战”。普京称，俄罗斯在乌“特别军事行动”是“必要且及时”的行动，这是一个主权、独立且强大的国家的“正确决定”。他认为北约对俄罗斯构成“明显威胁”，指责北约开始对与俄相邻的领土进行军事发展。俄罗斯的核战指挥专用飞机、素有“末日飞机”之称的伊尔-80空中战略指挥机，在阅兵式彩排中现身，引发西方媒体对于“普京将向西方发出‘末日’警告”的猜测，但是胜利日当天，空中阅兵因“天气原因”被取消。"
+	var cnm52="普京表示，在过去一年，俄罗斯与其他欧洲国家以及北约成员国的关系日趋紧张。俄方“敦促欧洲找到一个公平的妥协方案，但是他们没有听取我们（的意见）”。普京补充称，欧洲国家曾准备在顿巴斯地区采取惩罚性行动，该地区现在是俄罗斯集中采取行动的地方。普京发表演讲之际，乌克兰总统泽连斯基发布视频讲话称，“我们正在为我们的孩子的自由而战，因此我们会赢（得战争的胜利）！”泽连斯基还说：“我们永远不会忘记我们的祖先在第二次世界大战中的经历，那场战争导致800多万乌克兰人失去生命。”"
+	var cnm61="敖德萨（Odessa），在乌克兰南部位于德涅斯特河流入黑海的海口东北30公里处，是乌克兰共和国第四大城市，敖德萨州首府。为黑海沿岸最大的港口城市和重要工业、科学、交通、文化教育及旅游中心。当地时间2022年2月24日，俄罗斯媒体报道称，俄军已登陆乌克兰敖德萨；随后，俄卫星社消息，乌克兰敖德萨发生爆炸。此前，普京宣布在顿巴斯地区进行特别军事行动，乌克兰多地传出爆炸声,当日，乌克兰武装部队总参谋部在脸书发布声明称，有关俄罗斯军队在敖德萨登陆的信息不属实。冲突的第五十天，俄罗斯黑海舰队旗舰“莫斯科”号（如右图）在敖德萨近海沉没。这艘以俄罗斯首都命名的军舰,是苏联海军“光荣”级导弹巡洋舰首舰，配备了一系列反舰导弹和地对空导弹，以及鱼雷、舰炮和"
+	var cnm62="导弹防御系统（这意味着舰上载有大量炸药）。它是黑海上唯一一艘“光荣”级导弹巡洋舰，另外两艘同级导弹巡洋舰——“乌斯季诺夫元帅”号和“瓦良格”号——分别部署在其北方舰队和太平洋舰队。俄方最初称，沉没是由于一场火灾引起的爆炸，受损的军舰在被拖往附近港口时被海浪吞没。乌方则称，是乌军用一枚“海王星”巡航导弹击中了“莫斯科”号，并造成了引爆弹药的大火。美国等西方国家情报更倾向于支持乌克兰的说法。这对于乌克兰来说，是一次重要的象征性胜利，但俄罗斯对乌克兰的海上封锁仍在继续。"
+	var cnm71="冲突第五十四天 4月18日，俄罗斯军队在三周时间内重新集结并重新部署，开始在乌克兰东部和东南部发起新的攻势。两军在伊久姆和顿涅茨克附近地区陷入激战。在伊久姆战场乌军投入4万多主力，俄军也将近卫坦克第1集团军第4和47师，第20集团军第3摩步师，近卫空降106师的一部分，雇佣军部分等4.5万人在伊久姆向南高密度展开。在伊久姆的战斗一直持续到了今天，俄军试图从伊久姆往南推进，但目前并未取得具体进展，而是在伊久姆西南方与乌军对峙。当前，在战斗最为激烈的卢甘斯克州北顿内茨克市方面，俄军已控制该市80％以上区域，乌军正从市中心撤退。由于先前俄军在北顿内茨克河的渡河行动频频受到乌军重创，俄军近期试图以不穿越北顿内茨克河的方式向利西昌斯克进攻。"
+	var cnm72="在顿内茨克州方面，俄军持续在巴赫穆特以东的城镇进行战斗，俄军目标是占领巴赫穆特后往北推进，切断北顿内茨克和利西昌斯克一带的乌军退路，形成完整的包围圈。但利西昌斯克位于山丘，在军事上占据有利位置，能有效防御俄军攻击，目前仍在乌克兰的控制之下。六月一日，伊久姆对峙局势图如右图所示："
+	var cnm81="顿涅茨克市（俄语：Донецк，乌克兰语：Донецьк）是乌克兰重要的工业城市。人口约92.9万，以讲俄语者为主，居民主要为俄罗斯族和乌克兰族，是乌克兰国内俄罗斯族比例较高的城市。在前苏联时期，顿涅茨克就是著名的顿巴斯煤城，境内有前苏联时期闻名的亚速钢厂、伊里查钢厂、焦炭厂、化工厂、盐矿。当地时间5月28日，俄军在顿巴斯地区，俄军在红利曼、北顿涅茨克等多个方向发起进攻，其目的是为了对北顿涅茨克和利西昌斯克的乌军部队形成包围。在俄军的攻势下，顿涅茨克地区战况十分激烈，乌克兰总统泽连斯基同一天表示，随着俄罗斯在乌东部加强进攻，目前当地局势“很困难，难以形容”。俄军仍在顿涅茨克和卢甘斯克地区不断增加部队和装备试图包围乌军，"
+	var cnm82="俄罗斯国防部发言人科纳申科夫28日说，在顿涅茨克武装力量和俄军共同行动下，俄方已彻底攻克顿涅茨克地区的战略要地和铁路枢纽红利曼,但是乌副防长马利亚尔同一天在电视直播中表示，关于俄方已完全控制红利曼的消息不属实，她强调该地区仍在进行激烈的战斗。乌克兰武装部队总参谋部称，俄军部队正巩固其所控制的红利曼地区。右图：满目疮痍的顿涅茨克机场"
+	var cnm91="基辅（Kyiv, Киев），古译“乞瓦”，乌克兰的首都兼经济、文化、政治中心,位于乌克兰中北部，基辅是乌克兰铁路、水路、航空和汽车运输的枢纽。基辅也是乌克兰的经济中心。在苏联时期，基辅就已成为工业发达城市，乌克兰的机器制造业、化工、航空工业、船舶制造业的许多骨干企业设在基辅市，轻工、纺织和印刷工业也相当发达。基辅也是乌克兰的科学和文化中心。乌克兰科学院、乌克兰建筑科学院及许多其他科研机构均设在基辅市。2月24日，俄罗斯总统普京宣布，向乌克兰发起“特别军事行动”后，"
+	var cnm92="乌克兰多地上空传来巨大的爆炸声，空袭警报响彻首都基辅。乌克兰总统泽连斯基宣布乌克兰全境进入战时状态。俄罗斯军队从空中、陆地和海上多方向向乌克兰发起攻势：陆军分别从森基夫卡（乌克兰与俄罗斯和白俄罗斯之间的陆地三通边境口岸）和克里米亚向基辅和乌南部港口城市赫尔松移动；海陆两军从亚速海两栖登陆，启动了激烈的马里乌波尔争夺战。俄罗斯伞兵两次试图攻入位于基辅的总统府，刺杀泽连斯基。战争进入第二周。五角大楼报告称，位于基辅西北部的40英里俄罗斯装甲车队已经“进入射击位置”，但该车队面临乌军的激烈抵抗。右图：卫星影像下正在向基辅进发的俄军车队"
+	var chart_bool=false;
+	var chart_zhansun=false;
+	var point_bool=false;
+		  
+		  
+		  var array_txt=new Array();
+		  var array_img = new Array();
+		  
+		  array_txt[0] = cnm11+cnm12;
+		  array_txt[1] = cnm21+cnm22;
+		  array_txt[2] = cnm31+cnm32;
+		  array_txt[3] = cnm41+cnm42;
+		  array_txt[4] = cnm51+cnm52;
+		  array_txt[5] = cnm61+cnm62;
+		  array_txt[6] = cnm71+cnm72;
+		  array_txt[7] = cnm81+cnm82;
+		  array_txt[8] = cnm91+cnm92;
+		  
+		  array_img[0] = "./img/mali1.jpeg"
+		  array_img[1] = "./img/shedao.png"
+		  array_img[2] ="./img/heersong.png"
+		  array_img[3] ="./img/haerkefu.jpeg"
+		  array_img[4] = "./img/hongchang.jpeg"
+		  array_img[5] = "./img/mosikehao.jpeg"
+		  array_img[6] = "./img/yijiumu.jpeg"
+		  array_img[7] = "./img/dunniecike.png"
+		  array_img[8] = "./img/jifu.jpeg"
+		  
+		  function addDiv_Point(item){
+			  //alert('5555555')
+			  if(point_bool==false){
+				  //alert('hhhhh')
+				  var div000=document.createElement("div");
+				    
+				    //var div000 = document.getElementById('div000');
+				    div000.id ='div000'
+				    div000.style.width= '60%'
+				    div000.style.height= '60%';
+				    div000.style.position= 'absolute';
+				    //div000.style.backgroundColor='#d0e4fe';
+				    div000.style.left= '20%';
+				    div000.style.top= '30%';
+				    document.body.appendChild(div000);
+				    var p11=document.createElement("p");
+				    var p12=document.createElement("p");
+				    p11.id = 'p11';
+				    p11.style.borderTopStyle= 'double'
+				    p11.style.borderLeftStyle= 'double'
+				    p11.style.borderBottomStyle= 'double'
+				    
+				    p11.style.borderWidth='3px'
+				    p11.style.borderColor='cornflowerblue';
+				    p11.style.width= '50%'
+				    p11.style.height= '100%';
+				    p11.style.position= 'absolute';
+				    p11.style.backgroundColor='white';
+				    p11.style.opacity=0.9;
+				    
+				    p11.style.left= '0%';
+				    p11.style.bottom= '0%';
+				    p11.innerHTML=array_txt[item];
+				    div000.appendChild(p11)
+				    p12.id = 'p12';
+				    p12.style.borderTopStyle= 'double'
+				    p12.style.borderRightStyle= 'double'
+				    p12.style.borderBottomStyle= 'double'
+				    
+				    p12.style.borderWidth='3px'
+				  p12.style.borderColor='cornflowerblue';
+				  
+				    p12.style.width= '50%'
+				    p12.style.height= '100%';
+				    p12.style.overflow='auto';
+				    p12.style.resize='horizontal';
+				    
+				    p12.style.position= 'absolute';
+				    p12.style.backgroundColor='#9500df';
+				    p12.style.opacity=0.9;
+				    var img1=document.createElement("img");
+				    img1.id = 'img1'
+				    img1.src =array_img[item]
+				    img1.style.width = '100%';
+				    img1.style.height ='auto';
+				    
+				  	p12.appendChild(img1)
+				  	//p12.innerHTML=cnm12;
+				  
+				    
+				    p12.style.left= '50%';
+				    p12.style.bottom= '0%';
+				    
+				    div000.appendChild(p12)
+				    point_bool=true
+				  
+			  }
+			  
+		  }
+		  
+		  // function add_text_img(item){
+			 //  var p11 = document.getElementById('p11');
+			 //  var p12 = document.getElementById('p12');
+			 //  p11.innerHTML = array_txt[0];
+			 //  p12.appendChild(array_img[0])
+		  // }
+		  
+		  
+		  function addDiv_civilian(){
+			  if(chart_bool==false){
+				  var div000=document.createElement("div");
+				  			  
+				  			  //var div000 = document.getElementById('div000');
+				  			  div000.id='div_chart';
+				  			  div000.style.width= '50%'
+				  			  div000.style.height= '60%';
+				  			  div000.style.position= 'absolute';
+				  			  //div000.style.backgroundColor='#d0e4fe';
+				  			  div000.style.left= '25%';
+				  			  div000.style.top= '30%';
+				  			  document.body.appendChild(div000);
+				  			  var p11=document.createElement("p");
+				  			  var p12=document.createElement("p");
+				  			  p11.style.width= '70%'
+				  			  p11.style.height= '100%';
+				  			  p11.style.position= 'absolute';
+				  			  p11.style.backgroundColor='white';
+				  			  p11.style.opacity=0.9;
+				  			  
+				  			  p11.style.left= '0%';
+				  			  p11.style.bottom= '0%';
+				  			  div000.appendChild(p11)
+				  			  p12.style.width= '30%'
+				  			  p12.style.height= '100%';
+				  			  p12.style.position= 'absolute';
+				  			  p12.style.backgroundColor='#ffd790';
+				  			  p12.style.opacity=0.9;
+				  			  
+				  			  p12.style.left= '70%';
+				  			  p12.style.bottom= '0%';
+				  			  
+				  			  
+				  			  div000.appendChild(p12)
+				  			  
+				  			  var myChart_civilian1 = echarts.init(p11);
+				  			  var myChart_civilian2 = echarts.init(p12);
+				  			  
+				  			  myChart_civilian1.setOption(option2)
+				  			  myChart_civilian2.setOption(option1)
+				  			  chart_bool=true;
+				  			  
+				  			  //myChart2.setOption(option1);
+				  			  //myChart2.setOption(option2);
+				  			  //document.body.insertBefore(div, document.body.firstElementChild);
+				  
+			  }
+			  
+		  }
+		  
+		  
+		  function addDiv_demage(){
+		  			  if(chart_zhansun==false){
+		  				  var div000=document.createElement("div");
+		  				  			  
+		  				  			  //var div000 = document.getElementById('div000');
+		  				  			  div000.id='div_chart_zhansun';
+		  				  			  div000.style.width= '60%'
+		  				  			  div000.style.height= '60%';
+		  				  			  div000.style.position= 'absolute';
+		  				  			  //div000.style.backgroundColor='#d0e4fe';
+		  				  			  div000.style.left= '17%';
+		  				  			  div000.style.top= '25%';
+		  				  			  document.body.appendChild(div000);
+		  				  			  var p11=document.createElement("p");
+		  				  			  var p12=document.createElement("p");
+		  				  			  p11.style.width= '65%'
+		  				  			  p11.style.height= '100%';
+		  				  			  p11.style.position= 'absolute';
+		  				  			  p11.style.backgroundColor='white';
+		  				  			  p11.style.opacity=0.9;
+		  				  			  
+		  				  			  p11.style.left= '0%';
+		  				  			  p11.style.bottom= '0%';
+		  				  			  div000.appendChild(p11)
+		  				  			  p12.style.width= '65%'
+		  				  			  p12.style.height= '100%';
+		  				  			  p12.style.position= 'absolute';
+		  				  			  p12.style.backgroundColor='#aaaaf0';
+		  				  			  p12.style.opacity=0.9;
+		  				  			  
+		  				  			  p12.style.left= '65%';
+		  				  			  p12.style.bottom= '0%';
+		  				  			  
+		  				  			  
+		  				  			  div000.appendChild(p12)
+		  				  			  
+		  				  			  var myChart_civilian1 = echarts.init(p11);
+		  				  			  var myChart_civilian2 = echarts.init(p12);
+		  				  			  
+		  				  			  myChart_civilian1.setOption(zhansun)
+		  				  			  myChart_civilian2.setOption(option)
+		  				  			  chart_zhansun=true;
+		  				  			  		  				  
+		  			  }
+		  			  
+		  		  }
+		  			 var option2 = {
+			    title: {
+			      text: '平民伤亡'
+			    },
+			    tooltip: {
+			      trigger: 'axis',
+			      axisPointer: {
+			        type: 'shadow'
+			      }
+			    },
+			    legend: {
+			  	  //   orient: 'vertical',
+			  	  //   left: 'left'
+			  	  
+			    },
+			    grid: {
+			      left: '3%',
+			      right: '4%',
+			      bottom: '3%',
+			      containLabel: true
+			    },
+			    yAxis: {
+			      type: 'value',
+			      boundaryGap: [0, 0.01]
+			    },
+			    xAxis: {
+			      type: 'category',
+			      data: ['死亡', '受伤']
+			    },
+			    series: [
+			      {
+			        name: '男性',
+			        type: 'bar',
+			        data: [1580,992]
+			      },
+			      {
+			        name: '女性',
+			        type: 'bar',
+			        data: [1038, 681]
+			      },
+			      {
+			        name: '儿童',
+			        type: 'bar',
+			        data: [268, 423]
+			      },
+			  	
+			  	{
+			  	  name: '未知性别者',
+			  	  type: 'bar',
+			  	  data: [1283, 2886]
+			  	}
+			  	
+			  
+			    ]
+			  };
+			  
+			var option1 = {
+			    title: {
+			      text: '伤亡比',
+			      //subtext: 'Fake Data',
+			      left: 'center',
+			  	top: '20%',
+			    },
+			    tooltip: {
+			      trigger: 'item'
+			    },
+			    legend: {
+			      orient: 'vertical',
+			      left: 'center',
+			  	bottom:'17%',
+			  	orient:'horizontal',
+			    },
+			    series: [
+			      {
+			        name: 'Access From',
+			        type: 'pie',
+			        radius: '85%',
+			  	  label: {
+			  	    show: false
+			  	  },
+			  	  
+			        data: [
+			          { value: 4169, name: '死亡' },
+			          { value: 4982, name: '受伤' },
+			        ],
+			        emphasis: {
+			          itemStyle: {
+			            shadowBlur: 10,
+			            shadowOffsetX: 0,
+			            shadowColor: 'rgba(0, 0, 0, 0.5)'
+			          }
+			        }
+			      }
+			    ]
+			  };
+			
+			var option = {
+			    title: {
+			      text: '辅助作战单位损失',
+			      subtext: '注：俄军数据源为俄罗斯国防部四月公布，乌军数据源为乌克兰国防部六月份公布。（包括主战单位）',
+			      left: 'center'
+			    },
+			    tooltip: {
+			      trigger: 'item',
+			      formatter: '{a} <br/>{b} : {c} ({d}%)'
+			    },
+			    legend: {
+			      left: 'center',
+			      top: 'bottom',
+			      data: [
+			        'rose1',
+			        'rose2',
+			        'rose3',
+			        'rose4',
+			        'rose5',
+			        'rose6',
+			        'rose7',
+			        'rose8'
+			      ]
+			    },
+			    toolbox: {
+			      show: true,
+			      feature: {
+			        mark: { show: true },
+			        dataView: { show: true, readOnly: false },
+			        restore: { show: true },
+			        saveAsImage: { show: true }
+			      }
+			    },
+			    series: [
+			      {
+			        name: '俄军战绩',
+					//id = 1;
+			        type: 'pie',
+			        radius: [30, 100],
+			        center: ['25%', '50%'],
+			        roseType: 'radius',
+			        itemStyle: {
+			          borderRadius: 5
+			        },
+			        label: {
+			          show: true
+			        },
+			        emphasis: {
+			          label: {
+			            show: true
+			  		  //show: false
+			  		  
+			          }
+			        },
+			        data: [
+			          { value: 185, name: '固定翼飞机' },
+			          { value: 129, name: '直升机' },
+			          { value: 1077, name: '无人机' },
+			          //{ value: 3363, name: '装甲车' },
+			          { value: 457, name: '火箭炮' },
+			          //{ value: 1744, name: '身管火炮' },
+			          //{ value: 3329, name: '车辆' },
+			          { value: 326, name: '防空系统' }
+			        ]
+			      },
+			      {
+			        name: '乌军战绩',
+			        type: 'pie',
+			        radius: [30, 100],
+			        center: ['75%', '50%'],
+			        roseType: 'area',
+			        itemStyle: {
+			          borderRadius: 5
+			        },
+			        data: [
+			          { value: 208, name: '固定翼飞机' },
+			          { value: 175, name: '直升机' },
+			          { value: 519, name: '无人机' },
+			          // { value: 4704, name: '装甲车' },
+			          { value: 207, name: '火箭炮' },
+			          // { value: 659, name: '身管火炮' },
+			          // { value: 2290, name: '车辆' },
+			          { value: 94, name: '防空系统' }
+			        ]
+			      }
+			    ]
+			  };
+			  
+				var zhansun = {
+					title: {
+					  text: '主战单位损失'
+					},
+					tooltip: {
+					  trigger: 'axis',
+					  axisPointer: {
+					    type: 'shadow'
+					  }
+					},
+					legend: {},
+					grid: {
+					  left: '3%',
+					  right: '4%',
+					  bottom: '3%',
+					  containLabel: true
+					},
+					yAxis: {
+					  type: 'value',
+					  boundaryGap: [0, 0.01]
+					},
+					xAxis: {
+					  type: 'category',
+					  data: ['俄方','乌方' ]
+					},
+					series: [
+					  {
+					    name: '人员阵亡',
+					    type: 'bar',
+					    data: [23367,30700]
+					  },
+					  {
+					    name: '装甲车',
+					    type: 'bar',
+					    data: [3363, 4704]
+					  },
+					  {
+					    name: '身管火炮',
+					    type: 'bar',
+					    data: [1744, 659]
+					  },
+					
+					{
+					  name: '车辆',
+					  type: 'bar',
+					  data: [3329, 2290]
+					}
+					
+			    ]
+			  };
+			  
+			
+	
+	  require(["esri/config","esri/Map", "esri/views/MapView","esri/layers/FeatureLayer","esri/Graphic","esri/geometry/Multipoint","esri/geometry/Point","esri/layers/GeoJSONLayer", "esri/widgets/Legend","esri/renderers/SimpleRenderer","esri/symbols/SimpleMarkerSymbol","esri/layers/support/FeatureEffect","esri/layers/support/FeatureFilter","esri/widgets/FeatureTable","esri/widgets/LayerList","esri/layers/MapImageLayer"], function (esriConfig,Map, MapView,FeatureLayer,Graphic,Multipoint,Point,GeoJSONLayer,Legend,SR,SMS,FeatureEffect,FeatureFilter,FeatureTable,LayerList,MapImageLayer) {
+	
+	    esriConfig.apiKey = "AAPK56e3ac027f044c4089d8ceec232fc05dYaOuzVRzm8tMRqvzOvDvIEevbqJ85yppn9PacU6cy4duurJrVK9wo_8BcWO8i8bi";
+	
+	    const map = new Map({
+	      basemap: "arcgis-navigation-night" // Basemap layer service
+	    });
+				
+		
+		const maliwuboer0 = new Point({
+		  type: "point", // autocasts as new Point()
+		  longitude: 37.552460046650836,
+		  latitude: 47.108680430811255,
+		  z :1532.7
+		});
+	
+	let layer_city = new MapImageLayer({
+	    url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/SampleWorldCities/MapServer/0"
+	  }); 
+	
+	    const view = new MapView({
+	      map: map,
+	      center: maliwuboer0, // Longitude, latitude
+	      zoom: 8, // Zoom level
+	      container: "viewDiv" // Div element
+	    });
+		
+	    const point666 = new Point({
+	      type: "point", // autocasts as new Point()
+	      longitude: -49.97,
+	      latitude: 41.73,
+		  z :10
+	    });
+			
+			const shedao0 = new Point({
+			  type: "point", // autocasts as new Point()
+			  longitude: 30.20416667,
+			  latitude: 45.255,
+			  z :2154.9
+			});
+			
+			const heersong0 = new Point({
+			  type: "point", // autocasts as new Point()
+			  longitude: 32.613666251545325,
+			  latitude: 46.64042260882535,
+			  z :2016.1
+			});
+			
+			const jifu0 = new Point({
+			  type: "point", // autocasts as new Point()
+			  longitude: 30.530726163251497,
+			  latitude: 50.446105950981945,
+			  z :1491.71
+			});
+			
+			const haerkefu0 = new Point({
+			  type: "point", // autocasts as new Point()
+			  longitude: 36.22936879966664,
+			  latitude: 50.00561106318735,
+			  z :1300.2
+			});
+			
+			const aodesa0 = new Point({
+			  type: "point", // autocasts as new Point()
+			  longitude: 31.73333,
+			  latitude: 45.2,
+			  z :1300.2
+			});
+			
+			const yijiumu0 = new Point({
+			  type: "point", // autocasts as new Point()
+			  longitude: 37.27599077991749,
+			  latitude: 49.18543144838582,
+			  z :1300.2
+			});
+			
+			const hongchang0 = new Point({
+			  type: "point", // autocasts as new Point()
+			  longitude: 37.61979311789792,
+			  latitude: 55.75370393434439,
+			  z :1300.2
+			});
+			
+			const dunniecike0 = new Point({
+			  type: "point", // autocasts as new Point()
+			  longitude: 37.81262033333058,
+			  latitude: 48.00179922257054,
+			  z :1300.2
+			});
+			
+		
+				
+		let points=[
+			[117.1,36.2667],//东岳泰山
+			[110.0667,34.2083],//西岳华山
+			[113.6833,39.7],//北岳恒山
+			[113.06375,34.495],//中岳嵩山
+			[112.6667,27.2333], //南岳衡山
+			]
+		
+		
+	    const MutiPoint = new Multipoint({
+	      //type: "multipoint", // autocasts as new Point()
+		  //points:points,
+	    });
+		
+		//MutiPoint.addPoint(point666)
+		MutiPoint.addPoint(maliwuboer0)
+		MutiPoint.addPoint(shedao0)
+		MutiPoint.addPoint(heersong0)
+		MutiPoint.addPoint(jifu0)
+		MutiPoint.addPoint(haerkefu0)
+		MutiPoint.addPoint(aodesa0)
+		MutiPoint.addPoint(yijiumu0)
+		MutiPoint.addPoint(hongchang0)
+		MutiPoint.addPoint(dunniecike0)				
+		
+	    // Create a symbol for drawing the point
+	    const markerSymbol = {
+	      type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+	      color: [226, 119, 40],
+	      outline: {
+	        // autocasts as new SimpleLineSymbol()
+	        color: [255, 255, 255],
+	        width: 2
+	      }
+	    };
+	
+	    // Create a graphic and add the geometry and symbol to it
+	    const pointGraphic = new Graphic({
+	      geometry: MutiPoint,
+	      symbol: markerSymbol
+	    });
+		
+		const wuyue = [{
+			geometry: maliwuboer0,
+		  //symbol: markerSymbol,
+			attributes:{
+			FID:0,
+		  	name: "马里乌波尔",
+		  	HE:0,
+		  	pop_count:1000	}			  
+			},
+		
+			{
+			geometry: shedao0,
+		  //symbol: markerSymbol
+			attributes:{
+			FID:100,
+		  	name: "蛇岛",
+		  	HE:1,
+		  	pop_count:100	}		  
+			},
+		
+			{
+			geometry: heersong0,
+		  //symbol: markerSymbol
+			attributes:{
+			FID:200,
+		  	name: "赫尔松",
+		  	HE:2,
+		  	pop_count:1000	}		  
+			},
+		
+			{
+			geometry: jifu0,
+		  //symbol: markerSymbol
+			attributes:{
+			FID:300,
+		  	name: "基辅",
+		  	HE:8,
+		  	pop_count:1000	}		  
+			},
+		
+			{
+			geometry: haerkefu0,
+		  //symbol: markerSymbol
+			attributes:{
+			FID:400,
+		  	name: "哈尔科夫",
+		  	HE:3,
+		  	pop_count:1000	}		  
+			},
+		
+			{
+			geometry: aodesa0,
+		  //symbol: markerSymbol
+			attributes:{
+			FID:5,
+		  	name: "敖德萨",
+		  	HE:5,
+		  	pop_count:1000	}		  
+			},
+		
+			{
+			geometry: yijiumu0,
+		  //symbol: markerSymbol
+			attributes:{
+			FID:5,
+		  	name: "伊久姆",
+		  	HE:6,
+		  	pop_count:1000	}		  
+			},
+		
+			{
+			geometry: hongchang0,
+		  //symbol: markerSymbol
+			attributes:{
+			FID:5,
+		  	name: "红场",
+		  	HE:4,
+		  	pop_count:1000	}		  
+			},
+		
+			{
+			geometry: dunniecike0,
+		  //symbol: markerSymbol
+			attributes:{
+			FID:5,
+		  	name: "顿涅茨克",
+		  	HE:7,
+		  	pop_count:1000	}		  
+			},
+		
+		
+		];		
+		
+		const sms = new SMS({
+		  style: "square",
+		  color: [100,100,250,0.5],
+		  size: "6px",
+		  outline: null
+		});
+		     
+		  const sr_layer = new SR({
+		       symbol:sms,
+		                 visualVariables: [
+		                   {
+		                     type: "color",
+		                     field: "HE",
+		                     //normalizationField: "TOTPOP_CY",
+		                     legendOptions: {
+		                       title: "区域战争烈度",
+							   //showLegend:false,
+		                     },
+		                      stops: [
+		                       {
+		                         value: 0,
+		                         color: "#55aa00",
+		                         label: "战争烈度低"
+		                       },
+		                       {
+		                         value: 8,
+		                         color: "#ff0000",
+		                         label: "战争烈度高"
+		                       }
+		                     ]
+		                   }
+		                 ]
+			   
+		     });
+		
+		
+		let layer99 = new FeatureLayer({
+		  source: wuyue,  // autocast as a Collection of new Graphic()
+		  objectIdField: "HE",
+		  title:'热点冲突区域'
+		  //renderer: renderer
+		});
+		
+		
+		layer99.renderer=sr_layer;
+		
+		// let citiesLayer = new FeatureLayer({
+		//   url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/SampleWorldCities/MapServer/0",
+		//   //renderer: renderer
+		// });
+		var idcode = 0;
+		view.on("click",function(evt){
+			var times = 0;
+			var query = layer99.createQuery();
+			query.geometry = view.toMap(evt);
+			query.distance = 2000;
+			query.units = "meters";
+			query.spatialRelationship = "intersects"; // this is the default
+			query.returnGeometry = true;
+			query.outFields = ["HE"];
+				layer99.queryFeatures(query).then( function(fset){
+					//console.log(fset)
+					if(fset == null){
+						alert('hhhhh')
+					}else{
+						fset.features.forEach(function(item){
+								//alert(item.attributes.HE)
+								idcode=item.attributes.HE
+								
+								if(point_bool==false){
+											addDiv_Point(idcode)
+											times=1;
+										};
+								
+							})
+						
+					}
+				if(chart_zhansun==true){
+					var chart_div0 =document.getElementById('div_chart_zhansun');
+					chart_div0.remove();
+					chart_zhansun=false;
+				}
+				
+				
+				if(chart_bool==true){
+					var chart_div0 =document.getElementById('div_chart');
+					chart_div0.remove();
+					chart_bool=false;
+				}
+				//alert(times,point_bool)
+				if(point_bool==true&&times==0){
+					var point_div0 = document.getElementById('div000')
+					point_div0.remove();
+					point_bool=false;
+				}
+				
+				})
+		})		
+		
+		map.add(layer99);
+		//layer = map.layers.getItemAt(2);
+		
+		const excludedEffect = "grayscale(50%) opacity(80%)";
+		layer99.featureEffect = new FeatureEffect({
+		filter: new FeatureFilter({
+		     where: "HE > 100"
+		   }),
+		   excludedEffect: excludedEffect
+		 });
+		layer99.effect= "bloom(8, 0.5px, 0.1)";
+		
+		let query = layer99.createQuery();
+		query.where = "HE >200";
+		query.outFields = ["HE"];
+		
+		const featureTable = new FeatureTable({
+		  view: view, // The view property must be set for the select/highlight to work
+		  layer: layer99,
+		  //container: "table"
+		});
+						
+		 view.ui.add(
+		 
+		          new Legend({
+		            view: view
+		          }),
+		          "top-right"
+		        );
+	  });
+	  
+	</script>
+	
+	
+    <script type="text/javascript">
+    </script>
+  </body>
+</html>
